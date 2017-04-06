@@ -8,22 +8,16 @@
 using namespace std;
 
 class Player : public Character {
-    public:
-        Object * weapon;
-        Object * offhand;
-        Object * ranged;
-        Object * armor;
-        Object * helmet;
-        Object * cloak;
-        Object * gloves;
-        Object * boots;
-        Object * amulet;
-        Object * light;
-        Object * ring1;
-        Object * ring2;
+    private:
+        static const int MAX_INVENTORY_SIZE = 10;
         vector<Object *> inventory;
+        vector<Object *> equipment;
+
+    public:
         int getSpeed();
         int getAttackDamage();
+        bool canPickUpObject();
+        void addObjectToInventory(Object *);
         Player();
         ~Player();
 };

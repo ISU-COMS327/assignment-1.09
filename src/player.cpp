@@ -1,18 +1,42 @@
 #include "player.h"
 
 int Player :: getSpeed() {
-    // TODO update to use equipment
-    return speed;
+    int my_speed = speed;
+    for (int i = 0; i < equipment.size(); i++) {
+        Object * object = equipment[i];
+        if (object) {
+            my_speed += object->speed_bonus;
+        }
+    }
+    return my_speed;
 }
 
 int Player :: getAttackDamage() {
-    // TODO update to use equipment
-    return attack_damage->roll();
+    int damage = attack_damage->roll();
+    for (int i = 0; i < equipment.size(); i++) {
+        Object * object = equipment[i];
+        if (object) {
+            damage += object->damage_bonus->roll();
+        }
+    }
+    return damage;
+}
+
+bool Player :: canPickUpObject() {
+    return inventory.size() < MAX_INVENTORY_SIZE;
+}
+
+void Player :: addObjectToInventory (Object * object) {
+    inventory.push_back(object);
 }
 
 Player :: Player() {
     attack_damage = new Numeric("0+1d4");
     speed = 10;
+    hitpoints = 500;
+    for (int i = 0; i < 12; i++) {
+        equipment.push_back(NULL);
+    }
 }
 
 Player :: ~Player() {

@@ -233,7 +233,7 @@ int main(int argc, char *args[]) {
         int speed;
         if (min.coord.x == player->x && min.coord.y == player->y) {
             add_message("It's your turn");
-            speed = 10;
+            speed = player->getSpeed();
             int success = 0;
             while (!success) {
                 int ch = getch();
@@ -265,6 +265,7 @@ int main(int argc, char *args[]) {
             if (monster == NULL) {
                 continue;
             }
+            add_message("The monsters are moving towards you...");
             move_monster(monster);
             speed = monster->speed;
             min.coord.x = monster->x;
@@ -1006,7 +1007,7 @@ void update_board_view(int ncurses_start_x, int ncurses_start_y) {
     ncurses_start_y = max(ncurses_start_y - NCURSES_HEIGHT, 0);
     ncurses_start_coord.x = ncurses_start_x;
     ncurses_start_coord.y = ncurses_start_y;
-    int row = 0;
+    int row = 1;
     for (int y = ncurses_start_y; y <= ncurses_start_y + NCURSES_HEIGHT; y++) {
         int col = 0;
         for (int x = ncurses_start_x; x <= ncurses_start_x + NCURSES_WIDTH; x++) {
@@ -1184,6 +1185,12 @@ int handle_user_input(int key) {
         kill_player_or_monster_at(new_coord);
         player->x = new_coord.x;
         player->y = new_coord.y;
+    }
+    Board_Cell cell = board[new_coord.y][new_coord.x];
+    if (cell.object && player->canPickUpObject()) {
+        add_message("You picked up an object: " + cell.object->name);
+        player->addObjectToInventory(cell.object);
+        board[new_coord.y][new_coord.x].object = NULL;
     }
     update_player_board();
     return 1;
