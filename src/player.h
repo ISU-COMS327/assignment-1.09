@@ -18,6 +18,8 @@ class Player : public Character {
         int getAttackDamage();
         bool canPickUpObject();
         void addObjectToInventory(Object *);
+        string viewInventoryObjectAt(int index);
+        int getNumberOfItemsInInventory();
         Player();
         ~Player();
 };

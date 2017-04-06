@@ -1090,7 +1090,17 @@ int handle_user_input(int key) {
     new_coord.x = player->x;
     new_coord.y = player->y;
     string str = "";
-    if (key == 107 || key == 8) { // k - one cell up
+    if (key == 73) { // I - examine inventory
+        add_message("Which inventory index?");
+        int index = getch() - 48;
+        if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
+            add_message("It's your turn");
+            return 0;
+        }
+        add_message(player->viewInventoryObjectAt(index));
+        return 0;
+    }
+    else if (key == 107 || key == 8) { // k - one cell up
         if (board[player->y - 1][player->x].hardness > 0) {
            return 0;
         }

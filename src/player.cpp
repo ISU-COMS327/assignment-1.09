@@ -30,6 +30,14 @@ void Player :: addObjectToInventory (Object * object) {
     inventory.push_back(object);
 }
 
+string Player :: viewInventoryObjectAt(int index) {
+    return inventory[index]->description;
+}
+
+int Player :: getNumberOfItemsInInventory() {
+    return inventory.size();
+}
+
 Player :: Player() {
     attack_damage = new Numeric("0+1d4");
     speed = 10;
