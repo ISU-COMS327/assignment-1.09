@@ -303,8 +303,6 @@ int main(int argc, char *args[]) {
     monster_templates.clear();
     object_templates.clear();
     delete game_queue;
-    free(board);
-    free(player_board);
 
     return 0;
 }

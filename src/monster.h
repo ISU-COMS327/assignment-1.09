@@ -1,20 +1,15 @@
 #ifndef __MONSTER_H
 #define __MONSTER_H
 
-#include "numeric.h"
+#include "character.h"
 
-class Monster {
-    private:
-
+class Monster : public Character{
     public:
         string name;
         string description;
         string color;
         char symbol;
-        int speed;
         vector<string> abilities;
-        int hitpoints;
-        Numeric * attack_damage;
         int last_known_player_x;
         int last_known_player_y;
         int decimal_type;
