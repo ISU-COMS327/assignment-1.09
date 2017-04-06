@@ -7,5 +7,7 @@ class Character {
         int speed;
         int hitpoints;
         Numeric * attack_damage;
+        int x;
+        int y;
 };
 #endif

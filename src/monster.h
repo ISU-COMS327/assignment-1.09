@@ -13,8 +13,6 @@ class Monster : public Character{
         int last_known_player_x;
         int last_known_player_y;
         int decimal_type;
-        int x;
-        int y;
 
         void resetPlayerLocation();
         int getDecimalType();
