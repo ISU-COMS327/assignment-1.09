@@ -59,9 +59,9 @@ typedef struct {
     int non_tunneling_distance;
     int hardness;
     string type;
-    uint8_t x;
-    uint8_t y;
-    uint8_t has_player;
+    int x;
+    int y;
+    int has_player;
     Monster *monster;
     Object * object;
 } Board_Cell;
@@ -1838,6 +1838,24 @@ void kill_player_or_monster_at(struct Coordinate coord) {
     }
 }
 
+void displace_monster(struct Coordinate coord) {
+    vector<Board_Cell> cells = get_surrounding_cells(coord);
+    Board_Cell potential_cell;
+    for (int i = 0; i < cells.size(); i++) {
+        Board_Cell cell = cells[i];
+        if (cell.hardness == 0) {
+            if (!cell.monster) {
+                board[cell.y][cell.x].monster = board[coord.y][coord.x].monster;
+                board[coord.y][coord.x].monster = NULL;
+                return;
+            }
+            potential_cell = cell;
+        }
+    }
+    board[potential_cell.y][potential_cell.x].monster = board[coord.y][coord.x].monster;
+    board[coord.y][coord.x].monster = NULL;
+}
+
 void move_monster(Monster * monster) {
     int monster_x = monster->x;
     int monster_y = monster->y;
@@ -2159,10 +2177,13 @@ void move_monster(Monster * monster) {
             printf("Invalid decimal type, %d\n", decimal_type);
             break;
     }
-    if (new_coord.x != monster_x || new_coord.y != monster_y) {
-        kill_player_or_monster_at(new_coord);
-    }
     board[monster->y][monster->x].monster = NULL;
+    if (new_coord.x != monster_x || new_coord.y != monster_y) {
+        if (board[new_coord.y][new_coord.x].monster != NULL) {
+            displace_monster(new_coord);
+        }
+        // kill_player_or_monster_at(new_coord);
+    }
     monster->x = new_coord.x;
     monster->y = new_coord.y;
     board[new_coord.y][new_coord.x].monster = monster;
