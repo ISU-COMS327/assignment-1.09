@@ -95,7 +95,6 @@ static Player * player = new Player();
 string RLG_DIRECTORY = "";
 int IS_CONTROL_MODE = 1;
 int DO_QUIT = 0;
-int PLAYER_IS_ALIVE = 1;
 int DO_SAVE = 0;
 int DO_LOAD = 0;
 int SHOW_HELP = 0;
@@ -155,7 +154,6 @@ void connect_rooms_at_indexes(int index1, int index2);
 void move_player();
 struct Room get_room_player_is_in();
 void move_monster(Monster * monster);
-void kill_player_or_monster_at(struct Coordinate coord);
 void print_on_clear_screen(string message);
 
 int main(int argc, char *args[]) {
@@ -227,7 +225,7 @@ int main(int argc, char *args[]) {
     center_board_on_player();
     move(ncurses_player_coord.y, ncurses_player_coord.x);
     refresh();
-    while(monsters.size() > 0 && PLAYER_IS_ALIVE && !DO_QUIT) {
+    while(monsters.size() > 0 && player->isAlive() && !DO_QUIT) {
         center_board_on_player();
         refresh();
         Node min = game_queue->extractMin();
@@ -272,7 +270,7 @@ int main(int argc, char *args[]) {
             min.coord.x = monster->x;
             min.coord.y = monster->y;
         }
-        if (PLAYER_IS_ALIVE) {
+        if (player->isAlive()) {
             move(ncurses_player_coord.y, ncurses_player_coord.x);
         }
         else {
@@ -283,7 +281,7 @@ int main(int argc, char *args[]) {
         game_queue->insertWithPriority(min.coord, (1000/speed) + min.priority);
     }
 
-    if (!PLAYER_IS_ALIVE) {
+    if (!player->isAlive()) {
         add_message("You lost. The monsters killed you (press any key to exit)");
     }
     else if(!monsters.size()) {
@@ -1022,7 +1020,7 @@ void update_board_view(int ncurses_start_x, int ncurses_start_y) {
     for (int y = ncurses_start_y; y <= ncurses_start_y + NCURSES_HEIGHT; y++) {
         int col = 0;
         for (int x = ncurses_start_x; x <= ncurses_start_x + NCURSES_WIDTH; x++) {
-            if (PLAYER_IS_ALIVE && y == player->y && x == player->x) {
+            if (player->isAlive() && y == player->y && x == player->x) {
                 mvprintw(row, col, "@");
                 ncurses_player_coord.x = col;
                 ncurses_player_coord.y = row;
@@ -1094,6 +1092,22 @@ void handle_user_input_for_look_mode(int key) {
     }
     update_board_view(new_x, new_y);
     refresh();
+}
+
+void handle_killed_monster(Monster * monster) {
+    board[monster->y][monster->x].monster = NULL;
+    int index = -1;
+    for (int i = 0; i < monsters.size(); i++) {
+        if (monsters[i] == monster) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        monsters.erase(monsters.begin() + index);
+    }
+    delete monster;
+
 }
 
 int handle_user_input(int key) {
@@ -1357,8 +1371,25 @@ int handle_user_input(int key) {
         add_message(message);
         return 0;
     }
-    if (new_coord.x != player->x || new_coord.y != player->y) {
-        kill_player_or_monster_at(new_coord);
+    if (board[new_coord.y][new_coord.x].monster) {
+        int damage = player->getAttackDamage();
+        Monster * monster = board[new_coord.y][new_coord.x].monster;
+        monster->damage(damage);
+        int remaining = monster->hitpoints;
+        add_message("You deal " + to_string(damage) + " points of damage to the monster (" + to_string(remaining) + " pts remain)");
+        if (monster->isAlive()) {
+            new_coord.x = player->x;
+            new_coord.y = player->y;
+        }
+        else {
+            add_message("You killed a monster!");
+            handle_killed_monster(monster);
+            player->x = new_coord.x;
+            player->y = new_coord.y;
+
+        }
+    }
+    else if (new_coord.x != player->x || new_coord.y != player->y) {
         player->x = new_coord.x;
         player->y = new_coord.y;
     }
@@ -1383,7 +1414,7 @@ void center_board_on_player() {
 void print_board() {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            if (PLAYER_IS_ALIVE && y == player->y && x == player->x) {
+            if (player->isAlive() && y == player->y && x == player->x) {
                 printf("@");
             }
             else if (board[y][x].monster) {
@@ -1674,34 +1705,6 @@ struct Coordinate get_random_new_tunneling_location(struct Coordinate coord) {
 }
 
 
-void move_player() {
-    int found_monster = 0;
-    struct Coordinate new_coord;
-    struct Coordinate player_coord;
-    player_coord.x = player->x;
-    player_coord.y = player->y;
-    struct Available_Coords coords = get_non_tunneling_available_coords_for(player_coord);
-    for (int i = 0; i < coords.length; i++) {
-        struct Coordinate current_coord = coords.coords[i];
-        if (board[current_coord.y][current_coord.x].monster) {
-            found_monster = 1;
-            new_coord = current_coord;
-            break;
-        }
-    }
-    if (!found_monster) {
-        struct Coordinate player_coord;
-        player_coord.x = player->x;
-        player_coord.y = player->y;
-        new_coord = get_random_new_non_tunneling_location(player_coord);
-    }
-    if (new_coord.x != player->x || new_coord.y != player->y) {
-        kill_player_or_monster_at(new_coord);
-    }
-    player->x = new_coord.x;
-    player->y = new_coord.y;
-}
-
 vector<Board_Cell> get_surrounding_cells(struct Coordinate c) {
     vector<Board_Cell> cells;
     cells.push_back(board[c.y + 1][c.x]);
@@ -1809,42 +1812,16 @@ struct Coordinate get_straight_path_to(Monster * m, struct Coordinate coord) {
     return new_coord;
 }
 
-void kill_monster(Monster * m) {
-    int index = -1;
-    for (int i = 0; i < monsters.size(); i++) {
-        Monster * monster = monsters[i];
-        if (monster->x == m->x && monster->y == m->y) {
-            index = i;
-            break;
-        }
-    }
-    int x = m->x;
-    int y = m->y;
-    board[y][x].monster = NULL;
-    if (index >= 0) {
-        monsters.erase(monsters.begin() + index);
-    }
-    delete m;
-}
-
-void kill_player_or_monster_at(struct Coordinate coord) {
-    Monster * m = board[coord.y][coord.x].monster;
-    if (m) {
-        kill_monster(m);
-    }
-    if (player->x == coord.x && player->y == coord.y) {
-        PLAYER_IS_ALIVE = 0;
-        add_message("The player was killed!\n");
-    }
-}
-
 void displace_monster(struct Coordinate coord) {
+    Monster * monster = board[coord.y][coord.x].monster;
     vector<Board_Cell> cells = get_surrounding_cells(coord);
     Board_Cell potential_cell;
     for (int i = 0; i < cells.size(); i++) {
         Board_Cell cell = cells[i];
         if (cell.hardness == 0) {
             if (!cell.monster) {
+                monster->x = cell.x;
+                monster->y = cell.y;
                 board[cell.y][cell.x].monster = board[coord.y][coord.x].monster;
                 board[coord.y][coord.x].monster = NULL;
                 return;
@@ -1852,6 +1829,8 @@ void displace_monster(struct Coordinate coord) {
             potential_cell = cell;
         }
     }
+    monster->x = potential_cell.x;
+    monster->y = potential_cell.y;
     board[potential_cell.y][potential_cell.x].monster = board[coord.y][coord.x].monster;
     board[coord.y][coord.x].monster = NULL;
 }
@@ -1866,7 +1845,6 @@ void move_monster(Monster * monster) {
     struct Coordinate new_coord;
     new_coord.x = monster_x;
     new_coord.y = monster_y;
-    board[monster->y][monster->x].monster = NULL;
     int decimal_type = monster->getDecimalType();
     struct Coordinate last_known_player_location;
     last_known_player_location.x = monster->last_known_player_x;
@@ -2177,14 +2155,24 @@ void move_monster(Monster * monster) {
             printf("Invalid decimal type, %d\n", decimal_type);
             break;
     }
-    board[monster->y][monster->x].monster = NULL;
-    if (new_coord.x != monster_x || new_coord.y != monster_y) {
+
+    bool attacked_player = false;
+    if (new_coord.y == player->y && new_coord.x == player->x) {
+        attacked_player = true;
+        int damage = monster->getAttackDamage();
+        player->damage(damage);
+        add_message("Monster inflicted " + to_string(damage) + " points of damage on you!");
+        usleep(83333);
+    }
+    else if (new_coord.x != monster_x || new_coord.y != monster_y) {
         if (board[new_coord.y][new_coord.x].monster != NULL) {
             displace_monster(new_coord);
         }
-        // kill_player_or_monster_at(new_coord);
     }
-    monster->x = new_coord.x;
-    monster->y = new_coord.y;
-    board[new_coord.y][new_coord.x].monster = monster;
+    if (!attacked_player) {
+        board[monster->y][monster->x].monster = NULL;
+        monster->x = new_coord.x;
+        monster->y = new_coord.y;
+        board[new_coord.y][new_coord.x].monster = monster;
+    }
 }

@@ -14,6 +14,7 @@ class Monster : public Character{
         int last_known_player_y;
         int decimal_type;
 
+        int getAttackDamage();
         void resetPlayerLocation();
         int getDecimalType();
         ~Monster() {};

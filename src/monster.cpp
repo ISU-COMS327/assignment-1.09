@@ -5,6 +5,10 @@ void Monster :: resetPlayerLocation() {
     last_known_player_y = 0;
 }
 
+int Monster :: getAttackDamage() {
+    return attack_damage->roll();
+}
+
 int Monster :: getDecimalType() {
     int decimal_type = 0;
     for (int i = 0; i < abilities.size(); i++) {

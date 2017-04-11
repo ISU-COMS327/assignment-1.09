@@ -9,5 +9,7 @@ class Character {
         Numeric * attack_damage;
         int x;
         int y;
+        void damage(int amount);
+        bool isAlive();
 };
 #endif

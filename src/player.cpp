@@ -191,7 +191,8 @@ void Player :: removeInventoryItemAt(int index) {
 }
 
 Player :: Player() {
-    attack_damage = new Numeric("0+1d4");
+    //attack_damage = new Numeric("0+1d4");
+    attack_damage = new Numeric("3+5d9");
     speed = 10;
     hitpoints = 500;
     for (int i = 0; i < 12; i++) {
