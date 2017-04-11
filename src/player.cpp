@@ -34,8 +34,139 @@ string Player :: viewInventoryObjectAt(int index) {
     return inventory[index]->description;
 }
 
+void Player :: equipObjectAt(int index) {
+    Object * object = inventory[index];
+    if (object) {
+        int index = getIndexToSwapEquipmentWith(object->type);
+        Object * equippedObject = equipment[index];
+        if (equippedObject) {
+            inventory[index] = equippedObject;
+        }
+        else {
+            equipment.erase(equipment.begin() + index);
+        }
+        equipment[index] = object;
+    }
+}
+
+int Player :: getIndexToSwapEquipmentWith(string type) {
+    vector<int> indexes = getIndexOfEquipmentType(type);
+    for (int i = 0; i < indexes.size(); i++) {
+        int index = indexes[i];
+        if (!equipment[index]) {
+            return index;
+        }
+    }
+    return indexes[0];
+}
+
+vector<int> Player :: getIndexOfEquipmentType(string type) {
+    vector<int> indexes;
+    if (!type.compare("WEAPON")) {
+        indexes.push_back(0);
+    }
+    if (!type.compare("OFFHAND")) {
+        indexes.push_back(1);
+    }
+    if (!type.compare("RANGED")) {
+        indexes.push_back(2);
+    }
+    if (!type.compare("ARMOR")) {
+        indexes.push_back(3);
+    }
+    if (!type.compare("HELMET")) {
+        indexes.push_back(4);
+    }
+    if (!type.compare("CLOAK")) {
+        indexes.push_back(5);
+    }
+    if (!type.compare("GLOVES")) {
+        indexes.push_back(6);
+    }
+    if (!type.compare("BOOTS")) {
+        indexes.push_back(7);
+    }
+    if (!type.compare("AMULET")) {
+        indexes.push_back(8);
+    }
+    if (!type.compare("LIGHT")) {
+        indexes.push_back(9);
+    }
+    if (!type.compare("RING")) {
+        indexes.push_back(10);
+        indexes.push_back(11);
+    }
+    return indexes;
+}
+
+
 int Player :: getNumberOfItemsInInventory() {
     return inventory.size();
+}
+
+bool Player :: objectExistsInInventoryAt(int index) {
+    if (index < 0 || index > inventory.size() - 1) {
+        return false;
+    }
+    return inventory[index] != NULL;
+}
+
+Object * Player :: getInventoryItemAt(int index) {
+    return inventory[index];
+}
+
+int Player :: equipmentSlots() {
+    return equipment.size();
+}
+
+string Player :: equipmentSlotToString(int index) {
+    string type = getEquipmentTypeFromIndex(index);
+    string message = type + ": ";
+    Object * object = equipment[index];
+    if (object) {
+        message += object->name;
+    }
+    else {
+        message += "Empty";
+    }
+    return message;
+}
+
+string Player :: getEquipmentTypeFromIndex(int index) {
+    if (index == 0) {
+        return "WEAPON";
+    }
+    if (index == 1) {
+        return "OFFHAND";
+    }
+    if (index == 2) {
+        return "RANGED";
+    }
+    if (index == 3) {
+        return "ARMOR";
+    }
+    if (index == 4) {
+        return "HELMET";
+    }
+    if (index == 5) {
+        return "CLOAK";
+    }
+    if (index == 6) {
+        return "GLOVES";
+    }
+    if (index == 7) {
+        return "BOOTS";
+    }
+    if (index == 8) {
+        return "AMULET";
+    }
+    if (index == 9) {
+        return "LIGHT";
+    }
+    if (index == 10 || 11) {
+        return "RING";
+    }
+    return "Unknown";
 }
 
 Player :: Player() {

@@ -1100,6 +1100,41 @@ int handle_user_input(int key) {
         add_message(player->viewInventoryObjectAt(index));
         return 0;
     }
+    else if(key == 105) { // i - list inventory
+        curs_set(0);
+        clear();
+        string message = "INVENTORY\n";
+        if (player->getNumberOfItemsInInventory() == 0) {
+            message += "No items in inventory\n";
+        }
+        else {
+            for (int i = 0; i < player->getNumberOfItemsInInventory(); i++) {
+                Object * item = player->getInventoryItemAt(i);
+                message += to_string(i) + ". " + item->name + "\n";
+            }
+        }
+        message += "(Press any key to return to game view)";
+        add_message(message);
+        getch();
+        center_board_on_player();
+        add_message("It's your turn");
+        return 0;
+    }
+    else if (key == 101) { // e - list equipment
+        curs_set(0);
+        clear();
+        string message = "EQUIPMENT\n";
+        for (int i = 0; i < player->equipmentSlots(); i++) {
+            message += player->equipmentSlotToString(i) + "\n";
+        }
+        message += "(Press any key to return to game view)";
+        add_message(message);
+        getch();
+        center_board_on_player();
+        add_message("It's your turn");
+        return 0;
+
+    }
     else if (key == 107 || key == 8) { // k - one cell up
         if (board[player->y - 1][player->x].hardness > 0) {
            return 0;
@@ -1207,6 +1242,7 @@ int handle_user_input(int key) {
 }
 
 void center_board_on_player() {
+    curs_set(1);
     int new_y = player->y - 10;
     int new_x = player->x - 40;
     update_board_view(new_x, new_y);

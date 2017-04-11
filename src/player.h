@@ -12,6 +12,9 @@ class Player : public Character {
         static const int MAX_INVENTORY_SIZE = 10;
         vector<Object *> inventory;
         vector<Object *> equipment;
+        int getIndexToSwapEquipmentWith(string type);
+        vector<int> getIndexOfEquipmentType(string type);
+        string getEquipmentTypeFromIndex(int index);
 
     public:
         int getSpeed();
@@ -19,7 +22,12 @@ class Player : public Character {
         bool canPickUpObject();
         void addObjectToInventory(Object *);
         string viewInventoryObjectAt(int index);
+        void equipObjectAt(int index);
         int getNumberOfItemsInInventory();
+        bool objectExistsInInventoryAt(int index);
+        Object * getInventoryItemAt(int index);
+        int equipmentSlots();
+        string equipmentSlotToString(int index);
         Player();
         ~Player();
 };
