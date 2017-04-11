@@ -11,7 +11,7 @@ int Monster :: getAttackDamage() {
 
 int Monster :: getDecimalType() {
     int decimal_type = 0;
-    for (int i = 0; i < abilities.size(); i++) {
+    for (size_t i = 0; i < abilities.size(); i++) {
         string ability = abilities[i];
         if (ability.compare("SMART") == 0) {
             decimal_type ++;

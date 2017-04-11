@@ -324,7 +324,7 @@ void init_color_pairs() {
 
 void generate_monsters_from_templates() {
     monsters.clear();
-    while (monsters.size() < NUMBER_OF_MONSTERS) {
+    while (monsters.size() < (size_t) NUMBER_OF_MONSTERS) {
         int i = random_int(0, monster_templates.size() - 1);
         struct Coordinate coordinate;
         MonsterTemplate monster_template = monster_templates[i];
@@ -351,7 +351,7 @@ void generate_monsters_from_templates() {
 void generate_objects_from_templates() {
     objects.clear();
     int number_of_objects = random_int(20, 40);
-    while(objects.size() < number_of_objects) {
+    while(objects.size() < (size_t) number_of_objects) {
         int i = random_int(0, object_templates.size() - 1);
         struct Coordinate coordinate;
         ObjectTemplate object_template = object_templates[i];
@@ -495,7 +495,7 @@ void save_board() {
         }
     }
 
-    for (int i = 0; i < rooms.size(); i++) {
+    for (size_t i = 0; i < rooms.size(); i++) {
         struct Room room = rooms[i];
         uint8_t height = room.end_y - room.start_y + 1;
         uint8_t width = room.end_x - room.start_x + 1;
@@ -779,7 +779,7 @@ void set_tunneling_distance_to_player() {
         Board_Cell min_cell = board[min.coord.y][min.coord.x];
         vector<Board_Cell> neighbors = get_tunneling_neighbors(min.coord);
         int min_dist = min_cell.tunneling_distance + get_cell_weight(min_cell);
-        for (int i = 0; i < neighbors.size(); i++) {
+        for (size_t i = 0; i < neighbors.size(); i++) {
             Board_Cell neighbor_cell = neighbors[i];
             Board_Cell cell = board[neighbor_cell.y][neighbor_cell.x];
             if (min_dist < cell.tunneling_distance) {
@@ -878,7 +878,7 @@ void set_non_tunneling_distance_to_player() {
         Board_Cell min_cell = board[min.coord.y][min.coord.x];
         vector<Board_Cell> neighbors = get_non_tunneling_neighbors(min.coord);
         int min_dist = min_cell.non_tunneling_distance + 1;
-        for (int i = 0; i < neighbors.size(); i++) {
+        for (size_t i = 0; i < neighbors.size(); i++) {
             Board_Cell neighbor_cell = neighbors[i];
             Board_Cell cell = board[neighbor_cell.y][neighbor_cell.x];
             if (min_dist < cell.non_tunneling_distance) {
@@ -1092,7 +1092,7 @@ void handle_user_input_for_look_mode(int key) {
 void handle_killed_monster(Monster * monster) {
     board[monster->y][monster->x].monster = NULL;
     int index = -1;
-    for (int i = 0; i < monsters.size(); i++) {
+    for (size_t i = 0; i < monsters.size(); i++) {
         if (monsters[i] == monster) {
             index = i;
             break;
@@ -1498,7 +1498,7 @@ int room_is_valid(struct Room room) {
     if (height < MIN_ROOM_HEIGHT || width < MIN_ROOM_WIDTH) {
         return 0;
     }
-    for (int i = 0; i < rooms.size(); i++) {
+    for (size_t i = 0; i < rooms.size(); i++) {
         struct Room current_room = rooms[i];
         int start_x = current_room.start_x - 1;
         int start_y = current_room.start_y - 1;
@@ -1522,7 +1522,7 @@ void add_rooms_to_board() {
     cell.monster = NULL;
     cell.object = NULL;
     cell.has_player = 0;
-    for(int i = 0; i < rooms.size(); i++) {
+    for(size_t i = 0; i < rooms.size(); i++) {
         struct Room room = rooms[i];
         for (int y = room.start_y; y <= room.end_y; y++) {
             for(int x = room.start_x; x <= room.end_x; x++) {
@@ -1535,9 +1535,9 @@ void add_rooms_to_board() {
 }
 
 void dig_cooridors() {
-    for (int i = 0; i < rooms.size(); i++) {
+    for (size_t i = 0; i < rooms.size(); i++) {
         int next_index = i + 1;
-        if (next_index == rooms.size()) {
+        if ((size_t) next_index == rooms.size()) {
             next_index = 0;
         }
         connect_rooms_at_indexes(i, next_index);
@@ -1717,7 +1717,7 @@ vector<Board_Cell> get_surrounding_cells(struct Coordinate c) {
 Board_Cell get_cell_on_tunneling_path(struct Coordinate c) {
     vector<Board_Cell> cells = get_surrounding_cells(c);
     Board_Cell cell = board[c.y][c.x];
-    for (int i = 0; i < cells.size(); i++) {
+    for (size_t i = 0; i < cells.size(); i++) {
         Board_Cell current_cell = cells[i];
         if (current_cell.tunneling_distance < cell.tunneling_distance) {
             cell = current_cell;
@@ -1731,7 +1731,7 @@ Board_Cell get_cell_on_non_tunneling_path(struct Coordinate c) {
     vector<Board_Cell> cells = get_surrounding_cells(c);
     Board_Cell cell = board[c.y][c.x];
     int min = cell.non_tunneling_distance;
-    for (int i = 0; i < cells.size(); i++) {
+    for (size_t i = 0; i < cells.size(); i++) {
         Board_Cell my_cell = cells[i];
         if (my_cell.non_tunneling_distance < min) {
             cell = my_cell;
@@ -1747,7 +1747,7 @@ struct Room get_room_player_is_in() {
     room.end_x = 0;
     room.start_y = 0;
     room.end_y = 0;
-    for (int i = 0; i < rooms.size(); i++) {
+    for (size_t i = 0; i < rooms.size(); i++) {
         struct Room current_room = rooms[i];
         if (current_room.start_x <= player->x && player->x <= current_room.end_x) {
             if (current_room.start_y <= player->y && player->y <= current_room.end_y) {
@@ -1809,12 +1809,10 @@ struct Coordinate get_straight_path_to(Monster * m, struct Coordinate coord) {
 }
 
 void displace_monster(struct Coordinate coord) {
-    add_message("DISPLACING");
-    usleep(83333);
     Monster * monster = board[coord.y][coord.x].monster;
     vector<Board_Cell> cells = get_surrounding_cells(coord);
     Board_Cell potential_cell;
-    for (int i = 0; i < cells.size(); i++) {
+    for (size_t i = 0; i < cells.size(); i++) {
         Board_Cell cell = cells[i];
         if (cell.hardness == 0) {
             if (!cell.monster) {

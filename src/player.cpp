@@ -2,7 +2,7 @@
 
 int Player :: getSpeed() {
     int my_speed = speed;
-    for (int i = 0; i < equipment.size(); i++) {
+    for (size_t i = 0; i < equipment.size(); i++) {
         Object * object = equipment[i];
         if (object) {
             my_speed += object->speed_bonus;
@@ -13,7 +13,7 @@ int Player :: getSpeed() {
 
 int Player :: getAttackDamage() {
     int damage = attack_damage->roll();
-    for (int i = 0; i < equipment.size(); i++) {
+    for (size_t i = 0; i < equipment.size(); i++) {
         Object * object = equipment[i];
         if (object) {
             damage += object->damage_bonus->roll();
@@ -23,7 +23,7 @@ int Player :: getAttackDamage() {
 }
 
 bool Player :: canPickUpObject() {
-    return inventory.size() < MAX_INVENTORY_SIZE;
+    return inventory.size() < (size_t) MAX_INVENTORY_SIZE;
 }
 
 void Player :: addObjectToInventory (Object * object) {
@@ -51,7 +51,7 @@ void Player :: equipObjectAt(int index) {
 
 int Player :: getIndexToSwapEquipmentWith(string type) {
     vector<int> indexes = getIndexOfEquipmentType(type);
-    for (int i = 0; i < indexes.size(); i++) {
+    for (size_t i = 0; i < indexes.size(); i++) {
         int index = indexes[i];
         if (!equipment[index]) {
             return index;
@@ -105,7 +105,7 @@ int Player :: getNumberOfItemsInInventory() {
 }
 
 bool Player :: objectExistsInInventoryAt(int index) {
-    if (index < 0 || index > inventory.size() - 1) {
+    if (index < 0 || (size_t) index > inventory.size() - 1) {
         return false;
     }
     return inventory[index] != NULL;
@@ -170,7 +170,7 @@ string Player :: getEquipmentTypeFromIndex(int index) {
 }
 
 bool Player :: equipmentExistsAt(int index) {
-    if (index < 0 || index > equipment.size() - 1) {
+    if (index < 0 || (size_t) index > equipment.size() - 1) {
         return false;
     }
     return equipment[index] != NULL;
