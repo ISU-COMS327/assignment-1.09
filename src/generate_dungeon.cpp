@@ -156,6 +156,7 @@ void move_player();
 struct Room get_room_player_is_in();
 void move_monster(Monster * monster);
 void kill_player_or_monster_at(struct Coordinate coord);
+void print_on_clear_screen(string message);
 
 int main(int argc, char *args[]) {
     game_queue = new PriorityQueue();
@@ -990,6 +991,16 @@ void add_message(string message) {
     refresh();
 }
 
+void print_on_clear_screen(string message) {
+    curs_set(0);
+    clear();
+    add_message(message);
+    getch();
+    center_board_on_player();
+    add_message("It's your turn");
+
+}
+
 void update_player_board() {
     for (int y = player->y - 5; y <= player->y + 5; y++) {
         for (int x = player->x - 5; x <= player->x + 5; x++) {
@@ -1094,15 +1105,16 @@ int handle_user_input(int key) {
         add_message("Which inventory index?");
         int index = getch() - 48;
         if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
-            add_message("It's your turn");
+            add_message("No inventory item at that index. It's your turn");
             return 0;
         }
-        add_message(player->viewInventoryObjectAt(index));
+        string message = "Inventory item " + to_string(index) + ":\n";
+        message += player->viewInventoryObjectAt(index) + "\n\n";
+        message += "(Press any key to return to game view)";
+        print_on_clear_screen(message);
         return 0;
     }
     else if(key == 105) { // i - list inventory
-        curs_set(0);
-        clear();
         string message = "INVENTORY\n";
         if (player->getNumberOfItemsInInventory() == 0) {
             message += "No items in inventory\n";
@@ -1113,25 +1125,17 @@ int handle_user_input(int key) {
                 message += to_string(i) + ". " + item->name + "\n";
             }
         }
-        message += "(Press any key to return to game view)";
-        add_message(message);
-        getch();
-        center_board_on_player();
-        add_message("It's your turn");
+        message += "\n(Press any key to return to game view)";
+        print_on_clear_screen(message);
         return 0;
     }
     else if (key == 101) { // e - list equipment
-        curs_set(0);
-        clear();
         string message = "EQUIPMENT\n";
         for (int i = 0; i < player->equipmentSlots(); i++) {
             message += player->equipmentSlotToString(i) + "\n";
         }
-        message += "(Press any key to return to game view)";
-        add_message(message);
-        getch();
-        center_board_on_player();
-        add_message("It's your turn");
+        message += "\n(Press any key to return to game view)";
+        print_on_clear_screen(message);
         return 0;
 
     }
