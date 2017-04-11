@@ -4,9 +4,9 @@ int PriorityQueue :: size() {
     return nodes.size();
 }
 
-void PriorityQueue :: insertWithPriority(struct Coordinate coord, int priority) {
+void PriorityQueue :: insertWithPriority(Character * character, int priority) {
     Node node;
-    node.coord = coord;
+    node.character = character;
     node.priority = priority;
     if (nodes.size() == 0) {
         nodes.push_back(node);
@@ -32,21 +32,58 @@ Node PriorityQueue :: extractMin() {
     return min;
 }
 
-void PriorityQueue :: decreasePriority(struct Coordinate coord, int priority) {
+void PriorityQueue :: decreasePriority(Character * character, int priority) {
+    Node node;
+    node.character = character;
+    node.priority = priority;
+    for (int i = 0; i < nodes.size(); i++) {
+        Node existing_node = nodes[i];
+        if (character->id.compare(existing_node.character->id) == 0) {
+            nodes.erase(nodes.begin() + i);
+            insertWithPriority(character, priority);
+            return;
+        }
+    }
+}
+
+void PriorityQueue :: decreaseCoordPriority(struct Coordinate coord, int priority) {
     Node node;
     node.coord = coord;
     node.priority = priority;
-    bool coord_found = false;
     for (int i = 0; i < nodes.size(); i++) {
         Node existing_node = nodes[i];
-        if (coord.x == existing_node.coord.x && coord.y == existing_node.coord.y) {
+        if (existing_node.coord.x == coord.x && existing_node.coord.y == coord.y) {
             nodes.erase(nodes.begin() + i);
-            coord_found = true;
+            insertCoordWithPriority(coord, priority);
+            return;
+        }
+    }
+
+}
+
+void PriorityQueue :: insertCoordWithPriority(struct Coordinate coord, int priority) {
+    Node node;
+    node.coord = coord;
+    node.priority = priority;
+    if (nodes.size() == 0) {
+        nodes.push_back(node);
+        return;
+    }
+    bool was_added = false;
+    for (int i = 0; i < nodes.size(); i++) {
+        Node existing_node = nodes[i];
+        if (priority <= existing_node.priority) {
+            nodes.insert(nodes.begin() + i, node);
+            was_added = true;
             break;
         }
     }
-    if (!coord_found) {
-        return;
+    if (!was_added) {
+        nodes.push_back(node);
     }
-    insertWithPriority(coord, priority);
+
+}
+
+void PriorityQueue :: clear() {
+    nodes.clear();
 }

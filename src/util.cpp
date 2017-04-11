@@ -1,4 +1,19 @@
 #include "util.h"
+using namespace std;
+
+static const string alphanum =
+"0123456789"
+"!@#$%^&*"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"abcdefghipqrstuvwxyz";
+
+string generateRandomString(int size) {
+    string str = "";
+    for (int i = 0; i < size; i++) {
+       str += alphanum[random_int(0, alphanum.length())];
+    }
+    return str;
+}
 
 
 /*

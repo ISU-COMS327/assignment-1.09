@@ -4,6 +4,7 @@
 
 class Character {
     public:
+        string id;
         int speed;
         int hitpoints;
         Numeric * attack_damage;
@@ -11,5 +12,7 @@ class Character {
         int y;
         void damage(int amount);
         bool isAlive();
+        bool is(Character * other);
+        Character();
 };
 #endif

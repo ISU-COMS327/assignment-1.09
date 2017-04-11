@@ -6,6 +6,8 @@
 
 using namespace std;
 
+string generateRandomString(int size);
+
 vector<string> split(const string &text, string sep);
 
 bool starts_with(const string& s1, const string& s2);

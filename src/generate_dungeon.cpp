@@ -229,8 +229,9 @@ int main(int argc, char *args[]) {
         center_board_on_player();
         refresh();
         Node min = game_queue->extractMin();
+        Character * character = min.character;
         int speed;
-        if (min.coord.x == player->x && min.coord.y == player->y) {
+        if (character->is(player)) {
             add_message("It's your turn");
             speed = player->getSpeed();
             int success = 0;
@@ -254,21 +255,19 @@ int main(int argc, char *args[]) {
             if (success == 2) {
                 continue;
             }
-            min.coord.x = player->x;
-            min.coord.y = player->y;
             set_non_tunneling_distance_to_player();
             set_tunneling_distance_to_player();
         }
         else {
-            Monster * monster = board[min.coord.y][min.coord.x].monster;
+            Monster * monster = (Monster *) character;
             if (monster == NULL) {
+                add_message("MONSTER NULL");
+                usleep(833333);
                 continue;
             }
             add_message("The monsters are moving towards you...");
             move_monster(monster);
             speed = monster->speed;
-            min.coord.x = monster->x;
-            min.coord.y = monster->y;
         }
         if (player->isAlive()) {
             move(ncurses_player_coord.y, ncurses_player_coord.x);
@@ -278,7 +277,7 @@ int main(int argc, char *args[]) {
         }
         center_board_on_player();
         refresh();
-        game_queue->insertWithPriority(min.coord, (1000/speed) + min.priority);
+        game_queue->insertWithPriority(character, (1000/speed) + min.priority);
     }
 
     if (!player->isAlive()) {
@@ -344,7 +343,7 @@ void generate_monsters_from_templates() {
         monster->y = coordinate.y;
         board[monster->y][monster->x].monster = monster;
         monsters.push_back(monster);
-        game_queue->insertWithPriority(coordinate, monsters.size());
+        game_queue->insertWithPriority(monster, monsters.size());
     }
 
 }
@@ -421,10 +420,7 @@ void generate_new_board() {
         dig_rooms(NUMBER_OF_ROOMS);
         dig_cooridors();
     }
-    if (game_queue->size() > 0) {
-        delete game_queue;
-    }
-    game_queue = new PriorityQueue();
+    game_queue->clear();
     place_player();
     set_placeable_areas();
     set_non_tunneling_distance_to_player();
@@ -650,7 +646,7 @@ void place_player() {
     struct Coordinate coord;
     coord.x = player->x;
     coord.y = player->y;
-    game_queue->insertWithPriority(coord, 0);
+    game_queue->insertWithPriority(player, 0);
 }
 
 void set_placeable_areas() {
@@ -773,7 +769,7 @@ void set_tunneling_distance_to_player() {
                 board[y][x].tunneling_distance = INT_MAX;
             }
             if (board[y][x].hardness < IMMUTABLE_ROCK) {
-                tunneling_queue->insertWithPriority(coord, board[y][x].tunneling_distance);
+                tunneling_queue->insertCoordWithPriority(coord, board[y][x].tunneling_distance);
             }
         }
     }
@@ -791,7 +787,7 @@ void set_tunneling_distance_to_player() {
                 coord.x = cell.x;
                 coord.y = cell.y;
                 board[cell.y][cell.x].tunneling_distance = min_dist;
-                tunneling_queue->decreasePriority(coord, min_dist);
+                tunneling_queue->decreaseCoordPriority(coord, min_dist);
             }
         }
         count ++;
@@ -873,7 +869,7 @@ void set_non_tunneling_distance_to_player() {
                 board[y][x].non_tunneling_distance = INT_MAX;
             }
             if (board[y][x].hardness < 1) {
-                non_tunneling_queue->insertWithPriority(coord, board[y][x].non_tunneling_distance);
+                non_tunneling_queue->insertCoordWithPriority(coord, board[y][x].non_tunneling_distance);
             }
         }
     }
@@ -890,7 +886,7 @@ void set_non_tunneling_distance_to_player() {
                 coord.x = cell.x;
                 coord.y = cell.y;
                 board[cell.y][cell.x].non_tunneling_distance = min_dist;
-                non_tunneling_queue->decreasePriority(coord, min_dist);
+                non_tunneling_queue->decreaseCoordPriority(coord, min_dist);
             }
         }
         neighbors.empty();
@@ -1254,6 +1250,7 @@ int handle_user_input(int key) {
         Object * object = player->getInventoryItemAt(index);
         player->equipObjectAt(index);
         add_message("Equipped " + object->type + ": " + object->name);
+        return 0;
     }
     else if(key == 105) { // i - list inventory
         string message = "INVENTORY\n";

@@ -1,4 +1,5 @@
 #include <vector>
+#include "character.h"
 
 using namespace std;
 
@@ -10,7 +11,8 @@ struct Coordinate {
 typedef struct {
     int distance;
     int priority;
-    struct Coordinate coord;
+    Character * character;
+    Coordinate coord;
 } Node;
 
 class PriorityQueue {
@@ -19,7 +21,10 @@ class PriorityQueue {
 
     public:
         int size();
-        void insertWithPriority(struct Coordinate, int);
-        void decreasePriority(struct Coordinate, int);
+        void clear();
+        void insertWithPriority(Character * character, int);
+        void insertCoordWithPriority(struct Coordinate coord, int);
+        void decreaseCoordPriority(struct Coordinate coord, int);
+        void decreasePriority(Character * character, int);
         Node extractMin();
 };
