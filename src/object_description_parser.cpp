@@ -55,7 +55,7 @@ void ObjectDescriptionParser::parseFile() {
                         if (line.length() > 77) {
                             throw "Description line too long";
                         }
-                        description += line.substr(0, 76) + "\n";
+                        description += line.substr(0, 77) + "\n";
                     }
                     description.erase(description.end() - 1, description.end());
                     current_object->description = description;

@@ -12,18 +12,14 @@ void PriorityQueue :: insertWithPriority(Character * character, int priority) {
         nodes.push_back(node);
         return;
     }
-    bool was_added = false;
     for (int i = 0; i < nodes.size(); i++) {
         Node existing_node = nodes[i];
         if (priority <= existing_node.priority) {
             nodes.insert(nodes.begin() + i, node);
-            was_added = true;
-            break;
+            return;
         }
     }
-    if (!was_added) {
-        nodes.push_back(node);
-    }
+    nodes.push_back(node);
 }
 
 Node PriorityQueue :: extractMin() {

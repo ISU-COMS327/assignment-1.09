@@ -992,7 +992,6 @@ void print_on_clear_screen(string message) {
     getch();
     center_board_on_player();
     add_message("It's your turn");
-
 }
 
 void update_player_board() {
@@ -1810,6 +1809,8 @@ struct Coordinate get_straight_path_to(Monster * m, struct Coordinate coord) {
 }
 
 void displace_monster(struct Coordinate coord) {
+    add_message("DISPLACING");
+    usleep(83333);
     Monster * monster = board[coord.y][coord.x].monster;
     vector<Board_Cell> cells = get_surrounding_cells(coord);
     Board_Cell potential_cell;
@@ -2159,7 +2160,6 @@ void move_monster(Monster * monster) {
         int damage = monster->getAttackDamage();
         player->damage(damage);
         add_message("Monster inflicted " + to_string(damage) + " points of damage on you!");
-        usleep(83333);
     }
     else if (new_coord.x != monster_x || new_coord.y != monster_y) {
         if (board[new_coord.y][new_coord.x].monster != NULL) {
