@@ -37,15 +37,15 @@ string Player :: viewInventoryObjectAt(int index) {
 void Player :: equipObjectAt(int index) {
     Object * object = inventory[index];
     if (object) {
-        int index = getIndexToSwapEquipmentWith(object->type);
-        Object * equippedObject = equipment[index];
+        int equipmentIndex = getIndexToSwapEquipmentWith(object->type);
+        Object * equippedObject = equipment[equipmentIndex];
         if (equippedObject) {
             inventory[index] = equippedObject;
         }
         else {
-            equipment.erase(equipment.begin() + index);
+            inventory.erase(inventory.begin() + index);
         }
-        equipment[index] = object;
+        equipment[equipmentIndex] = object;
     }
 }
 
@@ -167,6 +167,27 @@ string Player :: getEquipmentTypeFromIndex(int index) {
         return "RING";
     }
     return "Unknown";
+}
+
+bool Player :: equipmentExistsAt(int index) {
+    if (index < 0 || index > equipment.size() - 1) {
+        return false;
+    }
+    return equipment[index] != NULL;
+}
+
+Object * Player :: getEquipmentAt(int index) {
+    return equipment[index];
+}
+
+void Player :: takeOffEquipment(int index) {
+    Object * item = equipment[index];
+    equipment[index] = NULL;
+    inventory.push_back(item);
+}
+
+void Player :: removeInventoryItemAt(int index) {
+    inventory.erase(inventory.begin() + index);
 }
 
 Player :: Player() {

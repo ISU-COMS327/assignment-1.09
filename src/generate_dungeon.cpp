@@ -1102,8 +1102,22 @@ int handle_user_input(int key) {
     new_coord.y = player->y;
     string str = "";
     if (key == 73) { // I - examine inventory
-        add_message("Which inventory index?");
-        int index = getch() - 48;
+        string title = "Which inventory index? ";
+        add_message(title);
+        move(0, title.length());
+        char arr[80];
+        echo();
+        getstr(arr);
+        string str(arr);
+        noecho();
+        int index;
+        try {
+            index = stoi(str);
+        }
+        catch(...) {
+            add_message("Invalid input. It's your turn");
+            return 0;
+        }
         if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
             add_message("No inventory item at that index. It's your turn");
             return 0;
@@ -1113,6 +1127,119 @@ int handle_user_input(int key) {
         message += "(Press any key to return to game view)";
         print_on_clear_screen(message);
         return 0;
+    }
+    else if (key == 120) {
+        string title = "Which inventory index? ";
+        add_message(title);
+        move(0, title.length());
+        char arr[80];
+        echo();
+        getstr(arr);
+        string str(arr);
+        noecho();
+        int index;
+        try {
+            index = stoi(str);
+        }
+        catch(...) {
+            add_message("Invalid input. It's your turn");
+            return 0;
+        }
+        if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
+            add_message("No inventory item at that index. It's your turn");
+            return 0;
+        }
+        Object * object = player->getInventoryItemAt(index);
+        player->removeInventoryItemAt(index);
+        add_message("Expunged " + object->name + " from the game. It's your turn");
+        delete object;
+        return 0;
+
+    }
+    else if (key == 100) { // d - drop item
+        string title = "Which inventory index? ";
+        add_message(title);
+        move(0, title.length());
+        char arr[80];
+        echo();
+        getstr(arr);
+        string str(arr);
+        noecho();
+        int index;
+        try {
+            index = stoi(str);
+        }
+        catch(...) {
+            add_message("Invalid input. It's your turn");
+            return 0;
+        }
+        if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
+            add_message("No inventory item at that index. It's your turn");
+            return 0;
+        }
+        Object * object = player->getInventoryItemAt(index);
+        board[player->y][player->x].object = object;
+        player_board[player->y][player->x].object = object;
+        player->removeInventoryItemAt(index);
+        add_message("Dropped " + object->name + ". It's your turn");
+        return 0;
+    }
+    else if (key == 116) { // t - take off item
+        string title = "Which equipment index? ";
+        add_message(title);
+        move(0, title.length());
+        char arr[80];
+        echo();
+        getstr(arr);
+        string str(arr);
+        noecho();
+        int index;
+        try {
+            index = stoi(str);
+        }
+        catch(...) {
+            add_message("Invalid input. It's your turn");
+            return 0;
+        }
+        if (player->equipmentExistsAt(index)) {
+            Object * equipment = player->getEquipmentAt(index);
+            if (player->canPickUpObject()) {
+                add_message("Moved " + equipment->type + " to inventory");
+                player->takeOffEquipment(index);
+            }
+            else {
+                add_message("Cannot take off " + equipment->type + "; no room in inventory. Try dropping it instead.");
+            }
+        }
+        else {
+            add_message("No equipment item at that index. It's your turn");
+        }
+        return 0;
+    }
+    else if (key == 119) { // w - wear item
+        string title = "Which inventory index? ";
+        add_message(title);
+        move(0, title.length());
+        char arr[80];
+        echo();
+        getstr(arr);
+        string str(arr);
+        noecho();
+        int index;
+        try {
+            index = stoi(str);
+        }
+        catch(...) {
+            add_message("Invalid input. It's your turn");
+            return 0;
+        }
+        if (index > player->getNumberOfItemsInInventory() - 1 || index < 0) {
+            add_message("No inventory item at that index. It's your turn");
+            return 0;
+        }
+        Object * object = player->getInventoryItemAt(index);
+        player->equipObjectAt(index);
+        add_message("Equipped " + object->type + ": " + object->name);
     }
     else if(key == 105) { // i - list inventory
         string message = "INVENTORY\n";
@@ -1132,7 +1259,7 @@ int handle_user_input(int key) {
     else if (key == 101) { // e - list equipment
         string message = "EQUIPMENT\n";
         for (int i = 0; i < player->equipmentSlots(); i++) {
-            message += player->equipmentSlotToString(i) + "\n";
+            message += to_string(i) + ". " + player->equipmentSlotToString(i) + "\n";
         }
         message += "\n(Press any key to return to game view)";
         print_on_clear_screen(message);

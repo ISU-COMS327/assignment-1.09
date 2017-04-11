@@ -28,6 +28,10 @@ class Player : public Character {
         Object * getInventoryItemAt(int index);
         int equipmentSlots();
         string equipmentSlotToString(int index);
+        bool equipmentExistsAt(int index);
+        Object * getEquipmentAt(int index);
+        void takeOffEquipment(int index);
+        void removeInventoryItemAt(int index);
         Player();
         ~Player();
 };
